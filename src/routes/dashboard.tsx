@@ -1,10 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { SiteLayout } from "@/components/SiteLayout";
 import { supabase } from "@/integrations/supabase/client";
 import type { Session } from "@supabase/supabase-js";
 import { toast } from "sonner";
-import { Plus, Trash2, LogOut, Pencil, X } from "lucide-react";
+import { Plus, Trash2, LogOut, Pencil, X, PawPrint } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Meu painel — Câmera Pet" }] }),
@@ -143,17 +143,17 @@ function Dashboard() {
 
   return (
     <SiteLayout>
-      <section className="mx-auto max-w-7xl px-6 py-12 md:px-14">
-        <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 className="text-4xl font-extrabold md:text-5xl">Meu painel</h1>
-            <p className="mt-2 text-sm text-muted-foreground">{session.user.email}</p>
+      <section className="mx-auto w-full max-w-7xl px-5 py-10 md:px-14 md:py-12">
+        <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between md:mb-10">
+          <div className="min-w-0">
+            <h1 className="text-3xl font-extrabold sm:text-4xl md:text-5xl">Meu painel</h1>
+            <p className="mt-2 truncate text-sm text-muted-foreground">{session.user.email}</p>
           </div>
           <div className="flex gap-2">
-            <button onClick={openCreate} className="btn-primary-glow inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-primary-foreground">
+            <button onClick={openCreate} className="btn-primary-glow inline-flex flex-1 items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-primary-foreground sm:flex-none">
               <Plus className="h-4 w-4" /> Cadastrar pet
             </button>
-            <button onClick={logout} className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-3 text-sm font-medium text-muted-foreground hover:text-foreground">
+            <button onClick={logout} className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground">
               <LogOut className="h-4 w-4" /> Sair
             </button>
           </div>
@@ -162,20 +162,23 @@ function Dashboard() {
         {loading ? (
           <p className="text-muted-foreground">Carregando...</p>
         ) : pets.length === 0 ? (
-          <div className="glass rounded-3xl p-16 text-center">
+          <div className="glass flex flex-col items-center rounded-3xl px-6 py-14 text-center sm:p-16">
+            <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/15 text-blue-bright">
+              <PawPrint className="h-6 w-6" />
+            </div>
             <p className="mb-6 text-muted-foreground">Você ainda não cadastrou nenhum pet.</p>
             <button onClick={openCreate} className="btn-primary-glow inline-flex items-center gap-2 rounded-full px-7 py-4 font-semibold text-primary-foreground">
               <Plus className="h-4 w-4" /> Cadastrar primeiro pet
             </button>
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 md:gap-6">
             {pets.map((p) => (
               <article key={p.id} className="glass overflow-hidden rounded-3xl">
                 <div className="aspect-[4/3] overflow-hidden bg-muted/40">
-                  {p.foto_url ? <img src={p.foto_url} alt={p.nome} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-6xl">🐾</div>}
+                  {p.foto_url ? <img src={p.foto_url} alt={p.nome} loading="lazy" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-primary/40"><PawPrint className="h-16 w-16" /></div>}
                 </div>
-                <div className="p-6">
+                <div className="p-5 sm:p-6">
                   <div className="mb-2 flex items-center justify-between gap-2">
                     <h3 className="text-xl font-bold">{p.nome}</h3>
                     <StatusBadge status={p.status} />
@@ -184,10 +187,10 @@ function Dashboard() {
                     {p.especie}{p.raca ? ` · ${p.raca}` : ""}
                   </p>
                   <div className="flex gap-2">
-                    <button onClick={() => openEdit(p)} className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-primary/10">
+                    <button onClick={() => openEdit(p)} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-primary/10">
                       <Pencil className="h-3.5 w-3.5" /> Editar
                     </button>
-                    <button onClick={() => remove(p.id)} className="inline-flex items-center gap-1.5 rounded-full border border-destructive/40 px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10">
+                    <button onClick={() => remove(p.id)} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-destructive/40 px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10">
                       <Trash2 className="h-3.5 w-3.5" /> Apagar
                     </button>
                   </div>
@@ -198,11 +201,18 @@ function Dashboard() {
         )}
 
         {showForm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm" onClick={() => setShowForm(false)}>
-            <form onClick={(e) => e.stopPropagation()} onSubmit={save} className="glass max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl p-8">
+          <div className="fixed inset-0 z-[60] flex items-end justify-center bg-background/80 backdrop-blur-sm sm:items-center sm:p-4" onClick={() => setShowForm(false)}>
+            <form
+              onClick={(e) => e.stopPropagation()}
+              onSubmit={save}
+              role="dialog"
+              aria-modal="true"
+              aria-label={editing ? "Editar pet" : "Novo pet"}
+              className="max-h-[92dvh] w-full max-w-2xl overflow-y-auto rounded-t-3xl border border-border bg-popover p-5 pb-8 animate-in slide-in-from-bottom-8 sm:rounded-3xl sm:p-8 sm:animate-in sm:fade-in sm:zoom-in-95"
+            >
               <div className="mb-6 flex items-center justify-between">
                 <h2 className="text-2xl font-extrabold">{editing ? "Editar pet" : "Novo pet"}</h2>
-                <button type="button" onClick={() => setShowForm(false)} className="rounded-full p-2 text-muted-foreground hover:bg-primary/10"><X className="h-5 w-5" /></button>
+                <button type="button" onClick={() => setShowForm(false)} aria-label="Fechar" className="rounded-full p-2 text-muted-foreground hover:bg-primary/10"><X className="h-5 w-5" /></button>
               </div>
               <div className="grid gap-4 md:grid-cols-2">
                 <Input label="Nome *" value={form.nome} onChange={(v) => setForm({ ...form, nome: v })} required />
@@ -210,18 +220,18 @@ function Dashboard() {
                 <Input label="Raça" value={form.raca} onChange={(v) => setForm({ ...form, raca: v })} />
                 <Input label="Cor" value={form.cor} onChange={(v) => setForm({ ...form, cor: v })} />
                 <Select label="Status" value={form.status} onChange={(v) => setForm({ ...form, status: v as any })} options={[["perdido", "Perdido"], ["encontrado", "Encontrado"], ["em_casa", "Em casa"]]} />
-                <Input label="Recompensa (R$)" type="number" value={form.recompensa} onChange={(v) => setForm({ ...form, recompensa: v })} />
+                <Input label="Recompensa (R$)" type="number" inputMode="decimal" min={0} step="0.01" value={form.recompensa} onChange={(v) => setForm({ ...form, recompensa: v })} />
                 <Input label="Última localização" value={form.ultima_localizacao} onChange={(v) => setForm({ ...form, ultima_localizacao: v })} className="md:col-span-2" />
                 <Input label="Data do desaparecimento" type="date" value={form.data_desaparecimento} onChange={(v) => setForm({ ...form, data_desaparecimento: v })} />
                 <div>
-                  <label className="mb-2 block text-sm font-medium">Foto</label>
-                  <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                    className="w-full rounded-full border border-border bg-background/60 px-4 py-3 text-sm file:mr-3 file:rounded-full file:border-0 file:bg-primary/15 file:px-3 file:py-1 file:text-blue-bright" />
+                  <label htmlFor="pet-foto" className="mb-2 block text-sm font-medium">Foto</label>
+                  <input id="pet-foto" type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                    className="field py-2.5 file:mr-3 file:rounded-full file:border-0 file:bg-primary/15 file:px-3 file:py-1 file:text-blue-bright" />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="mb-2 block text-sm font-medium">Descrição</label>
-                  <textarea rows={3} value={form.descricao} onChange={(e) => setForm({ ...form, descricao: e.target.value })}
-                    className="w-full rounded-2xl border border-border bg-background/60 px-5 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
+                  <label htmlFor="pet-descricao" className="mb-2 block text-sm font-medium">Descrição</label>
+                  <textarea id="pet-descricao" rows={3} value={form.descricao} onChange={(e) => setForm({ ...form, descricao: e.target.value })}
+                    placeholder="Coleira, marcas, comportamento..." className="field resize-y" />
                 </div>
               </div>
               <button disabled={saving} className="btn-primary-glow mt-6 w-full rounded-full px-7 py-4 font-semibold text-primary-foreground disabled:opacity-60">
@@ -246,21 +256,21 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 function Input({ label, value, onChange, className = "", ...rest }: { label: string; value: string; onChange: (v: string) => void; className?: string } & Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange" | "value">) {
+  const id = useId();
   return (
     <div className={className}>
-      <label className="mb-2 block text-sm font-medium">{label}</label>
-      <input {...rest} value={value} onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-full border border-border bg-background/60 px-5 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
+      <label htmlFor={id} className="mb-2 block text-sm font-medium">{label}</label>
+      <input id={id} {...rest} value={value} onChange={(e) => onChange(e.target.value)} className="field" />
     </div>
   );
 }
 
 function Select({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: Array<string | [string, string]> }) {
+  const id = useId();
   return (
     <div>
-      <label className="mb-2 block text-sm font-medium">{label}</label>
-      <select value={value} onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-full border border-border bg-background/60 px-5 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20">
+      <label htmlFor={id} className="mb-2 block text-sm font-medium">{label}</label>
+      <select id={id} value={value} onChange={(e) => onChange(e.target.value)} className="field">
         {options.map((o) => {
           const [v, l] = Array.isArray(o) ? o : [o, o];
           return <option key={v} value={v} className="bg-background">{l}</option>;

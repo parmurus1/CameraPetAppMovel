@@ -11,10 +11,12 @@ import type { ErrorComponentProps } from "@tanstack/react-router";
 import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
+import { SiteLayout } from "@/components/SiteLayout";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <SiteLayout>
+    <div className="flex min-h-[60vh] items-center justify-center px-5 py-16">
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-extrabold gradient-text">404</h1>
         <h2 className="mt-4 text-xl font-semibold">Página não encontrada</h2>
@@ -26,6 +28,7 @@ function NotFoundComponent() {
         </div>
       </div>
     </div>
+    </SiteLayout>
   );
 }
 
@@ -51,7 +54,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      { name: "theme-color", content: "#0b1124" },
       { title: "Câmera Pet — Ache seu pet com IA" },
       { name: "description", content: "Reencontre pets perdidos usando IA e câmeras urbanas em tempo real." },
       { property: "og:title", content: "Câmera Pet — Ache seu pet com IA" },
