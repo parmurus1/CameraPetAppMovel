@@ -1,12 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { MessageCircle, Copy, Check } from "lucide-react";
+import { MessageCircle, Copy, Check, Send } from "lucide-react";
 import { SiteLayout } from "@/components/SiteLayout";
 import { toast } from "sonner";
 import { sendContact } from "@/lib/contact.functions";
-
-const PHONE_DISPLAY = "+55 11 95832-0147";
-const PHONE_DIGITS = "5511958320147";
+import { PHONE_DISPLAY, WHATSAPP_URL } from "@/lib/site";
 
 export const Route = createFileRoute("/contato")({
   head: () => ({
@@ -14,7 +12,10 @@ export const Route = createFileRoute("/contato")({
       { title: "Contato — Câmera Pet" },
       { name: "description", content: "Fale com a equipe Câmera Pet pelo WhatsApp ou formulário." },
       { property: "og:title", content: "Contato — Câmera Pet" },
-      { property: "og:description", content: "Fale com a equipe Câmera Pet pelo WhatsApp ou formulário." },
+      {
+        property: "og:description",
+        content: "Fale com a equipe Câmera Pet pelo WhatsApp ou formulário.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -61,56 +62,101 @@ function Contato() {
 
   return (
     <SiteLayout>
-      <section className="mx-auto max-w-2xl px-6 py-20 md:px-14">
-        <h1 className="mb-3 text-4xl font-extrabold md:text-5xl">Fale com a gente</h1>
-        <p className="mb-10 text-muted-foreground">Dúvidas, parcerias com prefeituras ou ajuda com seu cadastro.</p>
-
-        <div className="glass mb-8 rounded-3xl p-8">
-          <p className="mb-2 text-sm font-medium text-muted-foreground">WhatsApp / Celular</p>
-          <p className="mb-5 select-all font-display text-2xl font-extrabold tracking-tight md:text-3xl">{PHONE_DISPLAY}</p>
-          <div className="flex flex-wrap gap-3">
-            <a
-              href={`https://wa.me/${PHONE_DIGITS}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary-glow inline-flex items-center gap-2 rounded-full px-6 py-3 font-semibold text-primary-foreground"
-            >
-              <MessageCircle className="h-4 w-4" /> WhatsApp
-            </a>
-            <button
-              type="button"
-              onClick={copy}
-              className="inline-flex items-center gap-2 rounded-full border border-primary/40 px-6 py-3 font-semibold text-blue-bright transition-colors hover:bg-primary/10"
-            >
-              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              {copied ? "Copiado" : "Copiar número"}
-            </button>
-          </div>
-        </div>
-
-        <form onSubmit={onSubmit} className="glass space-y-5 rounded-3xl p-8">
-          <Field label="Nome" name="nome" placeholder="Seu nome" maxLength={120} />
-          <Field label="E-mail" name="email" type="email" placeholder="voce@email.com" maxLength={200} />
+      <section className="mx-auto w-full max-w-6xl px-5 py-12 md:px-14 md:py-20">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_1.2fr] lg:gap-12">
           <div>
-            <label className="mb-2 block text-sm font-medium">Mensagem</label>
-            <textarea required rows={5} name="msg" maxLength={4000} placeholder="Como podemos ajudar?"
-              className="w-full rounded-2xl border border-border bg-background/60 px-5 py-4 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20" />
+            <h1 className="mb-3 text-3xl font-extrabold sm:text-4xl md:text-5xl">
+              Fale com a gente
+            </h1>
+            <p className="mb-8 text-muted-foreground md:mb-10">
+              Dúvidas, parcerias com prefeituras ou ajuda com seu cadastro.
+            </p>
+
+            <div className="glass rounded-3xl p-6 sm:p-8">
+              <p className="mb-2 text-sm font-medium text-muted-foreground">WhatsApp / Celular</p>
+              <p className="mb-5 select-all whitespace-nowrap font-display text-[clamp(1rem,5vw,1.5rem)] font-extrabold tracking-tight">
+                {PHONE_DISPLAY}
+              </p>
+              <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
+                <a
+                  href={WHATSAPP_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary-glow inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold text-primary-foreground sm:px-6 sm:text-base"
+                >
+                  <MessageCircle className="h-4 w-4" /> WhatsApp
+                </a>
+                <button
+                  type="button"
+                  onClick={copy}
+                  className="btn-outline px-5 py-3 text-sm sm:px-6 sm:text-base"
+                >
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  {copied ? "Copiado" : "Copiar"}
+                </button>
+              </div>
+            </div>
           </div>
-          <button disabled={sending} className="btn-primary-glow w-full rounded-full px-7 py-4 font-semibold text-primary-foreground disabled:opacity-60">
-            {sending ? "Enviando..." : "Enviar mensagem"}
-          </button>
-        </form>
+
+          <form
+            onSubmit={onSubmit}
+            className="glass space-y-5 rounded-3xl p-6 sm:p-8 lg:self-start"
+          >
+            <h2 className="text-xl font-bold">Envie uma mensagem</h2>
+            <Field
+              label="Nome"
+              name="nome"
+              autoComplete="name"
+              placeholder="Seu nome"
+              maxLength={120}
+            />
+            <Field
+              label="E-mail"
+              name="email"
+              type="email"
+              autoComplete="email"
+              placeholder="voce@email.com"
+              maxLength={200}
+            />
+            <div>
+              <label htmlFor="contato-msg" className="mb-2 block text-sm font-medium">
+                Mensagem
+              </label>
+              <textarea
+                id="contato-msg"
+                required
+                rows={5}
+                name="msg"
+                maxLength={4000}
+                placeholder="Como podemos ajudar?"
+                className="field resize-y"
+              />
+            </div>
+            <button
+              disabled={sending}
+              className="btn-primary-glow inline-flex w-full items-center justify-center gap-2 rounded-full px-7 py-4 font-semibold text-primary-foreground disabled:opacity-60"
+            >
+              <Send className="h-4 w-4" /> {sending ? "Enviando..." : "Enviar mensagem"}
+            </button>
+          </form>
+        </div>
       </section>
     </SiteLayout>
   );
 }
 
-function Field({ label, ...props }: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
+function Field({
+  label,
+  name,
+  ...props
+}: { label: string; name: string } & React.InputHTMLAttributes<HTMLInputElement>) {
+  const id = `contato-${name}`;
   return (
     <div>
-      <label className="mb-2 block text-sm font-medium">{label}</label>
-      <input required {...props}
-        className="w-full rounded-full border border-border bg-background/60 px-5 py-3.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20" />
+      <label htmlFor={id} className="mb-2 block text-sm font-medium">
+        {label}
+      </label>
+      <input required id={id} name={name} {...props} className="field" />
     </div>
   );
 }
