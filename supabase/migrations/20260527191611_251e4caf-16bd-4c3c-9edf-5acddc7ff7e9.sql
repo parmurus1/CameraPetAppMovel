@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Fotos de pets sao publicas" ON storage.objects;
